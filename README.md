@@ -1,97 +1,187 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Lockbox - Secure Password Manager
 
-# Getting Started
+A modern, secure password manager built with React Native and Electron, supporting desktop, web, and mobile platforms.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
 
-## Step 1: Start Metro
+- 🔒 Strong encryption using AES-256 or ChaCha20
+- 📱 Cross-platform support (Desktop, Web, iOS & Android)
+- 🔑 KeePass database format (.kdbx) compatibility
+- 🎨 Modern, user-friendly interface
+- 🔄 Password history and secure storage
+- 📎 File attachments support
+- 📲 Biometric authentication on mobile
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Development Requirements
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- Node.js 18+ 
+- npm 8+
+- Git
+- For iOS:
+  - macOS
+  - Xcode 14+
+  - CocoaPods
+- For Android:
+  - Android Studio
+  - JDK 11+
+  - Android SDK 33+
 
-```sh
-# Using npm
+## Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/lockbox.git
+cd lockbox
+
+# Install dependencies
+npm install
+
+# Install iOS dependencies (macOS only)
+cd ios && pod install && cd ..
+
+# Start development server (Web + Electron)
+npm run electron-dev
+
+# Start development server (Mobile)
 npm start
-
-# OR using Yarn
-yarn start
 ```
 
-## Step 2: Build and run your app
+## Build Instructions
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Mobile Apps
 
-### Android
+#### iOS
+```bash
+# Install dependencies
+npm install
+cd ios && pod install && cd ..
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# Run in development
 npm run ios
 
-# OR using Yarn
-yarn ios
+# Build for release
+cd ios
+xcodebuild -workspace Lockbox.xcworkspace -scheme Lockbox -configuration Release -sdk iphoneos build
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+#### Android
+```bash
+# Install dependencies
+npm install
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+# Run in development
+npm run android
 
-## Step 3: Modify your app
+# Build APK
+cd android
+./gradlew assembleRelease
 
-Now that you have successfully run the app, let's make changes!
+# Build App Bundle
+./gradlew bundleRelease
+```
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### Web Version
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```bash
+# Build for web
+npm run build
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+# Preview web build
+npm run preview
+```
 
-## Congratulations! :tada:
+### Desktop Version (Electron)
 
-You've successfully run and modified your React Native App. :partying_face:
+```bash
+# Development
+npm run electron-dev
 
-### Now what?
+# Build for current platform
+npm run electron-build
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+# Build specific formats
+npm run electron:build:dir      # Unpacked directory
+npm run electron:build:appimage # Linux AppImage
+```
 
-# Troubleshooting
+### Platform-Specific Desktop Builds
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+#### Windows
+```bash
+# Install dependencies
+npm install
 
-# Learn More
+# Build Windows executable
+npm run electron-build -- --win
+```
 
-To learn more about React Native, take a look at the following resources:
+#### macOS
+```bash
+# Install dependencies
+npm install
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+# Build macOS app
+npm run electron-build -- --mac
+```
+
+#### Linux
+```bash
+# Install dependencies
+npm install
+
+# Build Linux package
+npm run electron-build -- --linux
+
+# Build specific formats
+npm run electron-build -- --linux deb
+npm run electron-build -- --linux rpm
+npm run electron-build -- --linux AppImage
+```
+
+## Project Structure
+
+```
+lockbox/
+├── android/          # Android specific code
+├── ios/             # iOS specific code
+├── electron/        # Electron main process code
+├── src/
+│   ├── components/  # React Native components
+│   ├── contexts/    # React contexts
+│   ├── screens/     # Screen components
+│   ├── services/    # Business logic
+│   └── types/       # TypeScript types
+├── public/          # Static assets
+└── dist/           # Build output
+```
+
+## Development Notes
+
+- The app uses React Native for mobile and web platforms
+- Electron's IPC for secure file system operations on desktop
+- All cryptographic operations are performed using the KeePass-compatible libraries
+- The UI is built with React Native components
+- Database operations are handled securely per platform
+- Mobile platforms use secure storage and biometric authentication
+
+## Security
+
+- Uses KeePass-compatible encryption
+- Implements secure password storage
+- Biometric authentication on mobile devices
+- Secure enclave usage on iOS
+- Android Keystore integration
+- No telemetry or data collection
+- Regular security updates
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

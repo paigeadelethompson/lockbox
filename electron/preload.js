@@ -1,8 +1,8 @@
 "use strict";
 
 // electron/preload.ts
-var { contextBridge, ipcRenderer } = require("electron");
-var path = require("path");
+var electron = require("electron");
+var { contextBridge, ipcRenderer } = electron;
 contextBridge.exposeInMainWorld("electron", {
   fileSystem: {
     readFile: (filepath) => ipcRenderer.invoke("fs:readFile", filepath),
@@ -13,7 +13,7 @@ contextBridge.exposeInMainWorld("electron", {
     showSaveDialog: (options) => ipcRenderer.invoke("dialog:showSave", options)
   },
   path: {
-    join: (...args) => path.join(...args),
-    basename: (filepath) => path.basename(filepath)
+    join: (...args) => ipcRenderer.invoke("path:join", args),
+    basename: (filepath) => ipcRenderer.invoke("path:basename", filepath)
   }
 });
