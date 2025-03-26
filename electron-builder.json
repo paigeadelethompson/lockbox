@@ -1,0 +1,35 @@
+{
+  "appId": "com.lockbox.app",
+  "productName": "Lockbox",
+  "directories": {
+    "output": "dist",
+    "buildResources": "build"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*"
+  ],
+  "linux": {
+    "target": ["AppImage", "deb"],
+    "category": "Utility",
+    "artifactName": "${productName}-${version}.${ext}",
+    "icon": "build/icon.png"
+  },
+  "build": {
+    "appId": "com.lockbox.app",
+    "productName": "Lockbox",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility",
+      "artifactName": "${productName}-${version}.${ext}",
+      "icon": "build/icon.png"
+    }
+  }
+} 
