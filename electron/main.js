@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs').promises;
 const isDev = process.env.NODE_ENV === 'development';
 
 function createWindow() {
@@ -69,4 +70,51 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+// Add IPC handlers for dialog operations
+ipcMain.handle('dialog:showOpen', async (event, options) => {
+  return dialog.showOpenDialog({
+    ...options,
+    properties: ['openFile', ...(options.properties || [])]
+  });
+});
+
+ipcMain.handle('dialog:showSave', async (event, options) => {
+  return dialog.showSaveDialog(options);
+});
+
+// Add IPC handler for getting current working directory
+ipcMain.handle('process:cwd', () => {
+  return process.cwd();
+});
+
+// Add IPC handlers for file system operations
+ipcMain.handle('fs:readFile', async (event, filepath) => {
+  try {
+    const data = await fs.readFile(filepath);
+    return data.toString();
+  } catch (error) {
+    console.error('Error reading file:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('fs:writeFile', async (event, filepath, data) => {
+  try {
+    await fs.writeFile(filepath, data);
+    return true;
+  } catch (error) {
+    console.error('Error writing file:', error);
+    throw error;
+  }
+});
+
+// Add IPC handlers for path operations
+ipcMain.handle('path:join', async (event, args) => {
+  return path.join(...args);
+});
+
+ipcMain.handle('path:basename', async (event, filepath) => {
+  return path.basename(filepath);
 }); 

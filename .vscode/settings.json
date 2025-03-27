@@ -1,0 +1,23 @@
+{
+  "cSpell.enabled": false,
+  "cSpell.ignorePaths": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.json",
+    "**/*.md"
+  ],
+  "cSpell.ignoreRegExpList": [
+    "kdbx",
+    "otpauth",
+    "otplib",
+    "qrcode",
+    "reactivate",
+    "reactivateTimeout",
+    "topViewStyle",
+    "bottomViewStyle",
+    "containerStyle",
+    "cameraStyle"
+  ]
+} 

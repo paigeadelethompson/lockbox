@@ -39,8 +39,12 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({
 
   const handleCreateDatabase = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onDatabaseCreate(newDatabaseOptions);
-    setNewDatabaseOptions(defaultNewDatabaseOptions);
+    try {
+      await onDatabaseCreate(newDatabaseOptions);
+      setNewDatabaseOptions(defaultNewDatabaseOptions);
+    } catch (error) {
+      console.error('Failed to create database:', error);
+    }
   };
 
   const handleKeyFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {

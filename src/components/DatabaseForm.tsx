@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { DatabaseOptions } from '../services/databaseService';
 
 interface DatabaseFormProps {
-  onSubmit: (options: DatabaseOptions) => Promise<void>;
+  onSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
 export const DatabaseForm: React.FC<DatabaseFormProps> = ({ onSubmit }) => {
@@ -18,7 +18,7 @@ export const DatabaseForm: React.FC<DatabaseFormProps> = ({ onSubmit }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit(options);
+    await onSubmit(e);
   };
 
   return (

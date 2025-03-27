@@ -29,6 +29,9 @@ const LoginScreen: React.FC = () => {
     setError(null);
 
     try {
+      // Create the database first
+      await kdbxService.createNewDatabase(options);
+      
       // Show save file dialog in Electron
       if (window.electron) {
         const { dialog } = window.electron;
@@ -38,16 +41,18 @@ const LoginScreen: React.FC = () => {
           filters: [{ name: 'KeePass Database', extensions: ['kdbx'] }]
         });
         
-        if (!filePath) {
-          throw new Error('No save location selected');
+        if (filePath) {
+          // Save the database to the selected location
+          await kdbxService.saveDatabase(filePath);
         }
-        
-        options.path = filePath;
       }
 
-      await kdbxService.createNewDatabase(options);
-      setMasterPassword(options.password);
-      navigate("/");
+      // Reset form and return to login screen
+      setShowCreateForm(false);
+      setShowPasswordPrompt(false);
+      setSelectedDatabase(null);
+      setPassword("");
+      setError(null);
     } catch (error) {
       setError("Failed to create database");
       console.error("Database creation error:", error);
@@ -80,16 +85,20 @@ const LoginScreen: React.FC = () => {
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedDatabase) return;
+    if (!selectedDatabase || !selectedDatabase.path) {
+      setError("No database selected");
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const credentials = await databaseService.createCredentials({ ...selectedDatabase, password });
       await kdbxService.loadDatabase(
-        selectedDatabase.name,
-        credentials
+        selectedDatabase.path,
+        password,
+        selectedDatabase.keyFile,
+        selectedDatabase.hardwareKey
       );
 
       setMasterPassword(password);
@@ -136,20 +145,34 @@ const LoginScreen: React.FC = () => {
               <div className="text-red-500 text-sm text-center">{error}</div>
             )}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full flex items-center justify-center"
-            >
-              {isLoading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-              ) : (
-                <>
-                  <FontAwesomeIcon icon={faLock} className="mr-2" />
-                  Unlock Database
-                </>
-              )}
-            </button>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPasswordPrompt(false);
+                  setSelectedDatabase(null);
+                  setPassword("");
+                  setError(null);
+                }}
+                className="btn-secondary flex-1"
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-primary flex-1 flex items-center justify-center"
+              >
+                {isLoading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faLock} className="mr-2" />
+                    Unlock Database
+                  </>
+                )}
+              </button>
+            </div>
           </form>
         </div>
       </div>

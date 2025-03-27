@@ -51,40 +51,34 @@ class KdbxService {
         keyFile: options.keyFile,
         hardwareKey: options.hardwareKey
       });
-      
-      await this.saveDatabase();
     } catch (error) {
       console.error('Failed to create database:', error);
       throw error;
     }
   }
 
-  async saveDatabase(): Promise<void> {
-    if (!this.kdbx || !this.currentDatabasePath) {
+  async saveDatabase(filePath?: string): Promise<void> {
+    if (!this.kdbx) {
       throw new Error('No database loaded');
     }
 
     try {
       const data = await this.kdbx.save();
       
-      // Save to localStorage for web
-      localStorage.setItem("passwordDatabase", JSON.stringify(Array.from(new Uint8Array(data))));
-      
       // Save to file system in Electron
       if (window.electron) {
-        const fs = window.electron.fs;
-        const path = window.electron.path;
-        const databasesDir = path.join(process.cwd(), 'databases');
+        const { fileSystem } = window.electron;
         
-        // Ensure databases directory exists
-        await fs.promises.mkdir(databasesDir, { recursive: true });
+        // Use provided file path or throw an error
+        if (!filePath) {
+          throw new Error('No save location selected');
+        }
         
-        // Save the database file
-        const filePath = path.join(databasesDir, `${this.currentDatabasePath}.kdbx`);
-        await fs.promises.writeFile(filePath, Buffer.from(data));
+        console.log('Saving database to:', filePath);
+        // Convert ArrayBuffer to Uint8Array for writing
+        const uint8Array = new Uint8Array(data);
+        await fileSystem.writeFile(filePath, uint8Array);
         console.log('Database saved successfully to:', filePath);
-      } else {
-        console.log('Database saved successfully to localStorage');
       }
     } catch (error) {
       console.error('Failed to save database:', error);
@@ -92,29 +86,46 @@ class KdbxService {
     }
   }
 
-  async loadDatabase(path: string, credentials: Credentials): Promise<void> {
+  async loadDatabase(filePath: string, password: string, keyFile?: string, hardwareKey?: string): Promise<void> {
     try {
       let data: ArrayBuffer;
       
       if (window.electron) {
-        const fs = window.electron.fs;
-        const pathModule = window.electron.path;
-        const databasesDir = pathModule.join(process.cwd(), 'databases');
-        const filePath = pathModule.join(databasesDir, `${path}.kdbx`);
-        
-        const fileData = await fs.promises.readFile(filePath);
-        data = fileData.buffer;
-      } else {
-        const dbData = localStorage.getItem("passwordDatabase");
-        if (!dbData) {
-          throw new Error("No database found");
+        const { fileSystem } = window.electron;
+        // Ensure we have a valid file path
+        if (!filePath) {
+          throw new Error('No file path provided');
         }
-        data = new Uint8Array(JSON.parse(dbData)).buffer;
+        // If the path doesn't end with .kdbx, append it
+        const fullPath = filePath.endsWith('.kdbx') ? filePath : `${filePath}.kdbx`;
+        console.log('Loading database from:', fullPath);
+        const fileData = await fileSystem.readFile(fullPath);
+        console.log('Received file data length:', fileData.length);
+        // Use the Uint8Array directly since it's already converted in the preload script
+        data = fileData.buffer;
+        console.log('Using ArrayBuffer, length:', data.byteLength);
+      } else {
+        const storedData = localStorage.getItem("passwordDatabase");
+        if (!storedData) {
+          throw new Error("No database found in localStorage");
+        }
+        data = new Uint8Array(JSON.parse(storedData)).buffer;
       }
-      
+
+      // Create credentials
+      const credentials = await databaseService.createCredentials({
+        password,
+        keyFile,
+        hardwareKey
+      });
+
+      // Load the database
+      console.log('Attempting to load database with credentials');
       this.kdbx = await Kdbx.load(data, credentials);
-      this.currentDatabasePath = path;
-      console.log('Database loaded successfully');
+      this.currentDatabasePath = filePath;
+      
+      // Update last opened time
+      await databaseService.updateLastOpened(filePath);
     } catch (error) {
       console.error('Failed to load database:', error);
       throw error;
